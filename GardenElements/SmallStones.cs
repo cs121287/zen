@@ -8,7 +8,8 @@ namespace ZenGardenGenerator.GardenElements
         public override char Symbol => 'o';
         public override string Name => "Small Stones";
         public override string Meaning => "Diverse elements of nature, harmony";
-        public override Color Color => Color.FromArgb(169, 169, 169);
+        // Light gray stone color from Japanese garden imagery
+        public override Color Color => Color.FromArgb(128, 128, 128);
         public override GenerationRules.GenerationPhase Phase => GenerationRules.GenerationPhase.Terrain;
         public override ElementCategory Category => ElementCategory.Terrain;
 
@@ -37,26 +38,18 @@ namespace ZenGardenGenerator.GardenElements
             double probability = 0.04;
 
             // Prefer edges and corners, scatter behavior
-            switch (zone.Type)
+            probability *= zone.Type switch
             {
-                case ZoneType.Edge:
-                    probability *= 2.5;
-                    break;
-                case ZoneType.Corner:
-                    probability *= 2.0;
-                    break;
-                case ZoneType.FocalPoint:
-                    probability *= 1.5;
-                    break;
-                default:
-                    probability *= 1.0;
-                    break;
-            }
+                ZoneType.Edge => 2.5,
+                ZoneType.Corner => 2.0,
+                ZoneType.FocalPoint => 1.5,
+                _ => 1.0
+            };
 
             // Higher probability near larger rocks
             double distanceToLargeRocks = context.GetDistanceToNearestElement(row, col, typeof(LargeRocks));
             double distanceToMediumRocks = context.GetDistanceToNearestElement(row, col, typeof(MediumRocks));
-            
+
             if (distanceToLargeRocks < 6 || distanceToMediumRocks < 4)
             {
                 probability *= 1.8;

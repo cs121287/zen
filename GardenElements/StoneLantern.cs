@@ -8,74 +8,77 @@ namespace ZenGardenGenerator.GardenElements
         public override char Symbol => '*';
         public override string Name => "Stone Lantern";
         public override string Meaning => "Enlightenment, peace, meditation";
-        public override Color Color => Color.FromArgb(255, 215, 0);
-        public override double BaseProbability => 0.002;
-        public override ElementCategory Category => ElementCategory.Spiritual;
+        // Warm golden lantern glow from traditional Japanese garden imagery
+        public override Color Color => Color.FromArgb(255, 200, 100);
+        public override GenerationRules.GenerationPhase Phase => GenerationRules.GenerationPhase.Decoration;
+        public override ElementCategory Category => ElementCategory.Decoration;
 
-        public override double CalculateProbability(int row, int col, GardenZone zone, Random random)
+        public override bool CanPlaceAt(int row, int col, GardenZone zone, char[,] currentGarden, GardenContext context)
         {
-            double probability = BaseProbability;
-            
-            switch (zone.Type)
-            {
-                case ZoneType.FocalPoint:
-                    probability *= 15.0; // Very high preference for focal points
-                    break;
-                case ZoneType.Corner:
-                    probability *= 8.0;
-                    break;
-                case ZoneType.Edge:
-                    probability *= 3.0;
-                    break;
-                case ZoneType.Center:
-                    probability *= 0.1;
-                    break;
-                case ZoneType.Flow:
-                    probability *= 0.05;
-                    break;
-            }
-            
-            return probability;
+            // Rule 1: Cannot generate on gravel garden zones or flow zones
+            if (zone.Type == ZoneType.GravelGarden || zone.Type == ZoneType.Flow) return false;
+
+            // Rule 2: Only place on fine gravel
+            if (currentGarden[row, col] != '.') return false;
+
+            // Rule 3: Maximum 2 stone lanterns per garden
+            if (context.GetPlacementCount(GetType()) >= 2) return false;
+
+            // Rule 4: Must maintain large distance from garden edges
+            int height = currentGarden.GetLength(0);
+            int width = currentGarden.GetLength(1);
+            if (row < 10 || row >= height - 10 || col < 10 || col >= width - 10) return false;
+
+            // Rule 5: Minimum 20 units distance from other lanterns
+            if (context.IsNearElement(row, col, GetType(), 20)) return false;
+
+            // Rule 6: Minimum distance from other spiritual elements
+            if (context.IsNearElement(row, col, typeof(WaterFeature), 8) ||
+                context.IsNearElement(row, col, typeof(BridgePath), 8)) return false;
+
+            // Rule 7: Must have large clear space around (no other elements within 6 units)
+            return HasSufficientClearSpace(row, col, currentGarden, 6);
         }
 
-        public override bool CanPlaceAt(int row, int col, GardenZone zone, char[,] currentGarden)
+        public override double CalculateProbability(int row, int col, GardenZone zone, GardenContext context)
         {
-            // Lanterns need space around them and should be rare
-            return !HasNearbySpiritual(row, col, currentGarden, 8) && 
-                   !HasNearbyElement(row, col, currentGarden, '*', 15);
+            double probability = 0.001; // Very rare
+
+            // Strongly prefer focal points
+            probability *= zone.Type switch
+            {
+                ZoneType.FocalPoint => 20.0,
+                _ => 0.1
+            };
+
+            // Reduce probability if one already exists
+            if (context.GetPlacementCount(GetType()) > 0)
+                probability *= 0.1;
+
+            return probability * zone.GetDistanceInfluence(row, col);
         }
 
-        private bool HasNearbySpiritual(int row, int col, char[,] garden, int radius)
+        public override void PlaceElement(int row, int col, char[,] garden, GardenContext context)
         {
-            for (int r = Math.Max(0, row - radius); r <= Math.Min(garden.GetLength(0) - 1, row + radius); r++)
+            base.PlaceElement(row, col, garden, context);
+
+            // Create small clear area around lantern
+            CreateClearArea(row, col, garden);
+        }
+
+        private static void CreateClearArea(int row, int col, char[,] garden)
+        {
+            for (int r = row - 1; r <= row + 1; r++)
             {
-                for (int c = Math.Max(0, col - radius); c <= Math.Min(garden.GetLength(1) - 1, col + radius); c++)
+                for (int c = col - 1; c <= col + 1; c++)
                 {
-                    if (r != row || c != col)
+                    if (r >= 0 && r < garden.GetLength(0) && c >= 0 && c < garden.GetLength(1) &&
+                        (r != row || c != col) && garden[r, c] == '.')
                     {
-                        char element = garden[r, c];
-                        if (element == '*' || element == '=' || element == '+')
-                            return true;
+                        // Keep clear space as fine gravel
                     }
                 }
             }
-            return false;
-        }
-
-        private bool HasNearbyElement(int row, int col, char[,] garden, char element, int radius)
-        {
-            for (int r = Math.Max(0, row - radius); r <= Math.Min(garden.GetLength(0) - 1, row + radius); r++)
-            {
-                for (int c = Math.Max(0, col - radius); c <= Math.Min(garden.GetLength(1) - 1, col + radius); c++)
-                {
-                    if (r != row || c != col)
-                    {
-                        if (garden[r, c] == element)
-                            return true;
-                    }
-                }
-            }
-            return false;
         }
     }
 }

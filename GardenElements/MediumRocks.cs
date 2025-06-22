@@ -8,7 +8,8 @@ namespace ZenGardenGenerator.GardenElements
         public override char Symbol => '@';
         public override string Name => "Medium Rocks";
         public override string Meaning => "Natural rock formations, endurance";
-        public override Color Color => Color.FromArgb(128, 128, 128);
+        // Medium gray stone color from authentic Japanese gardens
+        public override Color Color => Color.FromArgb(105, 105, 105);
         public override GenerationRules.GenerationPhase Phase => GenerationRules.GenerationPhase.Terrain;
         public override ElementCategory Category => ElementCategory.Terrain;
 
@@ -40,21 +41,13 @@ namespace ZenGardenGenerator.GardenElements
             double probability = 0.03;
 
             // Prefer focal points and edges
-            switch (zone.Type)
+            probability *= zone.Type switch
             {
-                case ZoneType.FocalPoint:
-                    probability *= 3.0;
-                    break;
-                case ZoneType.Edge:
-                    probability *= 2.5;
-                    break;
-                case ZoneType.Corner:
-                    probability *= 2.0;
-                    break;
-                default:
-                    probability *= 0.7;
-                    break;
-            }
+                ZoneType.FocalPoint => 3.0,
+                ZoneType.Edge => 2.5,
+                ZoneType.Corner => 2.0,
+                _ => 0.7
+            };
 
             // Bonus if near large rocks (but not too close)
             double distanceToLargeRocks = context.GetDistanceToNearestElement(row, col, typeof(LargeRocks));

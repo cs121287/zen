@@ -9,52 +9,52 @@ namespace ZenGardenGenerator
     public abstract class ZenElement : IDisposable
     {
         private bool disposed = false;
-        
+
         /// <summary>
         /// The ASCII character symbol representing this element
         /// </summary>
         public abstract char Symbol { get; }
-        
+
         /// <summary>
         /// The display name of the element
         /// </summary>
         public abstract string Name { get; }
-        
+
         /// <summary>
         /// The traditional meaning and symbolism of the element
         /// </summary>
         public abstract string Meaning { get; }
-        
+
         /// <summary>
-        /// The color used to display this element
+        /// The color used to display this element (based on authentic Japanese garden imagery)
         /// </summary>
         public abstract Color Color { get; }
-        
+
         /// <summary>
         /// The generation phase when this element should be placed
         /// </summary>
         public abstract GenerationRules.GenerationPhase Phase { get; }
-        
+
         /// <summary>
         /// The category this element belongs to
         /// </summary>
         public abstract ElementCategory Category { get; }
-        
+
         /// <summary>
         /// The visual density weight for ASCII art hierarchy
         /// </summary>
         public virtual int VisualDensity => GenerationRules.VisualDensity.GetValueOrDefault(Symbol, 0);
-        
+
         /// <summary>
         /// Determines if this element can be placed at the specified coordinates
         /// </summary>
         public abstract bool CanPlaceAt(int row, int col, GardenZone zone, char[,] currentGarden, GardenContext context);
-        
+
         /// <summary>
         /// Calculates the probability of this element appearing at specific coordinates
         /// </summary>
         public abstract double CalculateProbability(int row, int col, GardenZone zone, GardenContext context);
-        
+
         /// <summary>
         /// Places the element and any required supporting elements
         /// </summary>

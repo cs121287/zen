@@ -8,40 +8,30 @@ namespace ZenGardenGenerator.GardenElements
         public override char Symbol => '.';
         public override string Name => "Fine Gravel";
         public override string Meaning => "Calm water, tranquil seas";
-        public override Color Color => Color.FromArgb(245, 245, 220);
-        public override double BaseProbability => 0.65;
-        public override ElementCategory Category => ElementCategory.GravelSand;
+        // Beige/tan gravel color from authentic Japanese garden paths
+        public override Color Color => Color.FromArgb(230, 220, 200);
+        public override GenerationRules.GenerationPhase Phase => GenerationRules.GenerationPhase.GravelGarden;
+        public override ElementCategory Category => ElementCategory.Surface;
 
-        public override double CalculateProbability(int row, int col, GardenZone zone, Random random)
+        public override bool CanPlaceAt(int row, int col, GardenZone zone, char[,] currentGarden, GardenContext context)
         {
-            double probability = BaseProbability;
-            
-            switch (zone.Type)
-            {
-                case ZoneType.FocalPoint:
-                    probability *= 0.3; // Less gravel around focal points
-                    break;
-                case ZoneType.Corner:
-                    probability *= 0.7;
-                    break;
-                case ZoneType.Edge:
-                    probability *= 0.8;
-                    break;
-                case ZoneType.Center:
-                    probability *= 1.5; // More gravel in open areas
-                    break;
-                case ZoneType.Flow:
-                    probability *= 1.2;
-                    break;
-            }
-            
-            return probability;
+            // Fine gravel is the base element and can go anywhere that's empty
+            return currentGarden[row, col] == '\0';
         }
 
-        public override bool CanPlaceAt(int row, int col, GardenZone zone, char[,] currentGarden)
+        public override double CalculateProbability(int row, int col, GardenZone zone, GardenContext context)
         {
-            // Fine gravel can go almost anywhere as the base element
-            return true;
+            // Base element - always place where nothing else exists
+            return 1.0;
+        }
+
+        public override void PlaceElement(int row, int col, char[,] garden, GardenContext context)
+        {
+            // Only place if the cell is empty (background element)
+            if (garden[row, col] == '\0')
+            {
+                garden[row, col] = Symbol;
+            }
         }
     }
 }

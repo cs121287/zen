@@ -8,7 +8,8 @@ namespace ZenGardenGenerator.GardenElements
         public override char Symbol => '=';
         public override string Name => "Bridge/Path";
         public override string Meaning => "Transition, journey, enlightenment";
-        public override Color Color => Color.FromArgb(160, 82, 45);
+        // Natural wood bridge color from Japanese garden imagery
+        public override Color Color => Color.FromArgb(160, 120, 80);
         public override GenerationRules.GenerationPhase Phase => GenerationRules.GenerationPhase.Infrastructure;
         public override ElementCategory Category => ElementCategory.Structure;
 
@@ -38,21 +39,13 @@ namespace ZenGardenGenerator.GardenElements
             double probability = 0.015;
 
             // Prefer flow and center zones
-            switch (zone.Type)
+            probability *= zone.Type switch
             {
-                case ZoneType.Flow:
-                    probability *= 4.0;
-                    break;
-                case ZoneType.Center:
-                    probability *= 3.0;
-                    break;
-                case ZoneType.FocalPoint:
-                    probability *= 2.0;
-                    break;
-                default:
-                    probability *= 0.5;
-                    break;
-            }
+                ZoneType.Flow => 4.0,
+                ZoneType.Center => 3.0,
+                ZoneType.FocalPoint => 2.0,
+                _ => 0.5
+            };
 
             // Higher probability if there are water features to cross
             if (context.WaterPaths.Count > 0)
@@ -73,8 +66,8 @@ namespace ZenGardenGenerator.GardenElements
             if (context.WouldIntersectWater(row, col, length, isHorizontal))
             {
                 // This is good - bridge should cross water
-                length = Math.Min(length, isHorizontal ? 
-                    garden.GetLength(1) - col - 2 : 
+                length = Math.Min(length, isHorizontal ?
+                    garden.GetLength(1) - col - 2 :
                     garden.GetLength(0) - row - 2);
             }
 
@@ -84,7 +77,7 @@ namespace ZenGardenGenerator.GardenElements
                 int placeRow = isHorizontal ? row : row + i;
                 int placeCol = isHorizontal ? col + i : col;
 
-                if (placeRow >= 0 && placeRow < garden.GetLength(0) && 
+                if (placeRow >= 0 && placeRow < garden.GetLength(0) &&
                     placeCol >= 0 && placeCol < garden.GetLength(1))
                 {
                     // Only place on gravel or cross water

@@ -8,7 +8,8 @@ namespace ZenGardenGenerator.GardenElements
         public override char Symbol => '|';
         public override string Name => "Vertical Raked";
         public override string Meaning => "Flowing rivers, streams";
-        public override Color Color => Color.FromArgb(135, 206, 235);
+        // Slightly darker blue-gray for vertical flow patterns
+        public override Color Color => Color.FromArgb(160, 175, 190);
         public override GenerationRules.GenerationPhase Phase => GenerationRules.GenerationPhase.FlowPatterns;
         public override ElementCategory Category => ElementCategory.Pattern;
 
@@ -33,18 +34,12 @@ namespace ZenGardenGenerator.GardenElements
             double probability = 0.05;
 
             // Prefer flow zones and edges
-            switch (zone.Type)
+            probability *= zone.Type switch
             {
-                case ZoneType.Flow:
-                    probability *= 3.5;
-                    break;
-                case ZoneType.Edge:
-                    probability *= 2.0;
-                    break;
-                default:
-                    probability *= 0.7;
-                    break;
-            }
+                ZoneType.Flow => 3.5,
+                ZoneType.Edge => 2.0,
+                _ => 0.7
+            };
 
             // Create stream patterns
             probability *= 1.0 + Math.Sin(col * 0.4) * 0.3;
@@ -56,7 +51,7 @@ namespace ZenGardenGenerator.GardenElements
         {
             // Create vertical lines of 3-6 characters
             int lineLength = context.Random.Next(3, 7);
-            
+
             for (int i = 0; i < lineLength && row + i < garden.GetLength(0); i++)
             {
                 if (garden[row + i, col] == '.')

@@ -16,12 +16,12 @@ namespace ZenGardenGenerator
     public partial class ZenGardenForm : Form
     {
         #region Private Fields
-        
+
         // Core components
         private readonly Random random = new();
         private readonly GardenGenerator gardenGenerator;
         private readonly object lockObject = new();
-        
+
         // UI Components - will be initialized in SetupUserInterface
         private TableLayoutPanel? mainContainer;
         private Panel? gardenPanel;
@@ -32,27 +32,27 @@ namespace ZenGardenGenerator
         private Button? saveButton;
         private Label? statusLabel;
         private ProgressBar? progressBar;
-        
+
         // Configuration constants
         private const int GARDEN_WIDTH = 120;
         private const int GARDEN_HEIGHT = 60;
         private const int MAX_GENERATION_TIME_MS = 30000; // 30 seconds timeout
-        
+
         // Threading and state management
         private CancellationTokenSource cancellationTokenSource = new();
         private volatile bool isGenerating = false;
         private volatile bool isFormReady = false;
         private bool disposed = false;
-        
+
         // Current garden data
         private char[,]? currentGarden;
         private Dictionary<char, ZenElement>? elementDictionary;
-        
+
         // Static readonly arrays for legend display
         private static readonly char[] RockStoneSymbols = ['#', '@', 'o'];
         private static readonly char[] GravelSandSymbols = ['.', '-', '|', '~'];
         private static readonly char[] SpiritualElementSymbols = ['^', '*', '=', '+'];
-        
+
         #endregion
 
         #region Constructor and Form Setup
@@ -63,14 +63,14 @@ namespace ZenGardenGenerator
             {
                 gardenGenerator = new GardenGenerator(random);
                 elementDictionary = gardenGenerator.GetElementDictionary();
-                
+
                 InitializeComponent();
                 SetupUserInterface();
-                
+
                 // Enable double buffering for smooth rendering
-                SetStyle(ControlStyles.AllPaintingInWmPaint | 
-                        ControlStyles.UserPaint | 
-                        ControlStyles.DoubleBuffer | 
+                SetStyle(ControlStyles.AllPaintingInWmPaint |
+                        ControlStyles.UserPaint |
+                        ControlStyles.DoubleBuffer |
                         ControlStyles.ResizeRedraw, true);
             }
             catch (Exception ex)
@@ -98,7 +98,7 @@ namespace ZenGardenGenerator
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            
+
             try
             {
                 isFormReady = true;
@@ -113,7 +113,7 @@ namespace ZenGardenGenerator
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
-            
+
             if (!isFormReady)
             {
                 isFormReady = true;
@@ -128,7 +128,7 @@ namespace ZenGardenGenerator
         private void CreateMainLayout()
         {
             mainContainer?.Dispose();
-            
+
             mainContainer = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -155,7 +155,7 @@ namespace ZenGardenGenerator
             if (mainContainer == null) return;
 
             gardenPanel?.Dispose();
-            
+
             gardenPanel = new Panel
             {
                 Dock = DockStyle.Fill,
@@ -214,7 +214,7 @@ namespace ZenGardenGenerator
             if (mainContainer == null) return;
 
             legendPanel?.Dispose();
-            
+
             legendPanel = new Panel
             {
                 Dock = DockStyle.Fill,
@@ -257,7 +257,7 @@ namespace ZenGardenGenerator
             if (mainContainer == null) return;
 
             principlesPanel?.Dispose();
-            
+
             principlesPanel = new Panel
             {
                 Dock = DockStyle.Fill,
@@ -345,7 +345,7 @@ namespace ZenGardenGenerator
             statusLabel?.Dispose();
             statusLabel = new Label
             {
-                Text = "Generated on: 2025-06-22 20:47:34 UTC for user: cs121287",
+                Text = "Generated on: 2025-06-22 21:25:56 UTC for user: cs121287",
                 Font = new Font("Segoe UI", 9F, FontStyle.Italic),
                 ForeColor = Color.FromArgb(105, 105, 105),
                 Location = new Point(380, 20),
@@ -365,7 +365,7 @@ namespace ZenGardenGenerator
         private async Task GenerateGardenAsync()
         {
             if (!isFormReady || isGenerating) return;
-            
+
             try
             {
                 lock (lockObject)
@@ -378,20 +378,20 @@ namespace ZenGardenGenerator
                 cancellationTokenSource?.Cancel();
                 cancellationTokenSource?.Dispose();
                 cancellationTokenSource = new CancellationTokenSource();
-                
+
                 SetUIGenerating(true);
-                
+
                 using var timeoutCts = new CancellationTokenSource(MAX_GENERATION_TIME_MS);
                 using var combinedCts = CancellationTokenSource.CreateLinkedTokenSource(
                     cancellationTokenSource.Token, timeoutCts.Token);
-                
+
                 // Create progress reporter
                 var progress = new Progress<int>(UpdateProgress);
-                
+
                 // Generate the entire garden before displaying
                 currentGarden = await gardenGenerator.GenerateGardenAsync(
                     GARDEN_WIDTH, GARDEN_HEIGHT, progress, combinedCts.Token);
-                
+
                 if (!combinedCts.Token.IsCancellationRequested && !IsDisposed && isFormReady)
                 {
                     await ApplyGardenToUI(currentGarden, combinedCts.Token);
@@ -419,7 +419,7 @@ namespace ZenGardenGenerator
         private async Task ApplyGardenToUI(char[,] garden, CancellationToken cancellationToken)
         {
             if (!isFormReady || gardenDisplay == null || gardenDisplay.IsDisposed) return;
-            
+
             await Task.Run(() =>
             {
                 SafeInvoke(() =>
@@ -428,7 +428,7 @@ namespace ZenGardenGenerator
                     {
                         // Convert garden array to string
                         var gardenText = ConvertGardenToString(garden);
-                        
+
                         gardenDisplay.Clear();
                         gardenDisplay.Text = gardenText;
                         ApplyColorFormatting();
@@ -442,7 +442,7 @@ namespace ZenGardenGenerator
             var gardenText = new StringBuilder();
             int height = garden.GetLength(0);
             int width = garden.GetLength(1);
-            
+
             for (int row = 0; row < height; row++)
             {
                 for (int col = 0; col < width; col++)
@@ -454,7 +454,7 @@ namespace ZenGardenGenerator
                     gardenText.AppendLine();
                 }
             }
-            
+
             return gardenText.ToString();
         }
 
@@ -462,16 +462,16 @@ namespace ZenGardenGenerator
         {
             try
             {
-                if (!isFormReady || gardenDisplay == null || gardenDisplay.IsDisposed || !gardenDisplay.IsHandleCreated) 
+                if (!isFormReady || gardenDisplay == null || gardenDisplay.IsDisposed || !gardenDisplay.IsHandleCreated)
                     return;
-                
+
                 if (elementDictionary == null) return;
-                
+
                 // Set default color
                 gardenDisplay.SelectAll();
                 gardenDisplay.SelectionColor = Color.FromArgb(60, 60, 60);
                 gardenDisplay.SelectionStart = 0;
-                
+
                 // Apply colors to individual elements
                 string text = gardenDisplay.Text;
                 for (int i = 0; i < text.Length; i++)
@@ -484,7 +484,7 @@ namespace ZenGardenGenerator
                         gardenDisplay.SelectionColor = element.Color;
                     }
                 }
-                
+
                 // Reset selection
                 gardenDisplay.SelectionStart = 0;
                 gardenDisplay.SelectionLength = 0;
@@ -504,9 +504,9 @@ namespace ZenGardenGenerator
             try
             {
                 if (rtb == null || rtb.IsDisposed || elementDictionary == null) return;
-                
+
                 rtb.Clear();
-                
+
                 AddLegendSection(rtb, "ROCKS AND STONES:", RockStoneSymbols);
                 AddLegendSection(rtb, "GRAVEL & SAND:", GravelSandSymbols);
                 AddLegendSection(rtb, "SPIRITUAL ELEMENTS:", SpiritualElementSymbols);
@@ -532,11 +532,11 @@ namespace ZenGardenGenerator
                         rtb.SelectionFont = new Font("Consolas", 11F, FontStyle.Bold);
                         rtb.SelectionColor = element.Color;
                         rtb.AppendText($"{element.Symbol} ");
-                        
+
                         rtb.SelectionFont = new Font("Segoe UI", 9F, FontStyle.Regular);
                         rtb.SelectionColor = Color.Black;
                         rtb.AppendText($"= {element.Name}\n");
-                        
+
                         rtb.SelectionFont = new Font("Segoe UI", 8F, FontStyle.Italic);
                         rtb.SelectionColor = Color.FromArgb(105, 105, 105);
                         rtb.AppendText($"   {element.Meaning}\n\n");
@@ -554,9 +554,9 @@ namespace ZenGardenGenerator
             try
             {
                 if (rtb == null || rtb.IsDisposed) return;
-                
+
                 rtb.Clear();
-                
+
                 (string title, string description)[] principles = [
                     ("🌸 AUSTERITY", "Minimal elements with maximum meaning. Each symbol represents profound natural forces."),
                     ("🎋 SIMPLICITY", "Clean lines and uncluttered spaces promote mental clarity and peace."),
@@ -573,7 +573,7 @@ namespace ZenGardenGenerator
                     rtb.SelectionFont = new Font("Segoe UI", 10F, FontStyle.Bold);
                     rtb.SelectionColor = Color.FromArgb(25, 25, 112);
                     rtb.AppendText($"{title}\n");
-                    
+
                     rtb.SelectionFont = new Font("Segoe UI", 9F, FontStyle.Regular);
                     rtb.SelectionColor = Color.Black;
                     rtb.AppendText($"{description}\n\n");
@@ -582,7 +582,7 @@ namespace ZenGardenGenerator
                 rtb.SelectionFont = new Font("Segoe UI", 10F, FontStyle.Bold);
                 rtb.SelectionColor = Color.FromArgb(139, 0, 0);
                 rtb.AppendText("MEDITATION GUIDE:\n");
-                
+
                 rtb.SelectionFont = new Font("Segoe UI", 9F, FontStyle.Italic);
                 rtb.SelectionColor = Color.FromArgb(105, 105, 105);
                 rtb.AppendText("Focus on the arrangement before you. Let your eyes move naturally across the garden, noticing how each element relates to the others. The rocks represent stability in change, while the raked patterns show the eternal flow of time and water. Allow your mind to find the same stillness reflected in this digital representation of ancient wisdom.");
@@ -608,7 +608,7 @@ namespace ZenGardenGenerator
             {
                 if (!isFormReady || gardenDisplay?.Text == null || string.IsNullOrEmpty(gardenDisplay.Text))
                 {
-                    MessageBox.Show("No garden to save. Please generate a garden first.", "Save Error", 
+                    MessageBox.Show("No garden to save. Please generate a garden first.", "Save Error",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
@@ -620,34 +620,34 @@ namespace ZenGardenGenerator
                     FileName = $"ZenGarden_{DateTime.Now:yyyyMMdd_HHmmss}.txt",
                     Title = "Save Zen Garden"
                 };
-                
+
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
                     SetUIGenerating(true);
-                    
+
                     await Task.Run(() =>
                     {
                         var content = CreateSaveContent();
                         File.WriteAllText(saveDialog.FileName, content, Encoding.UTF8);
                     });
-                    
-                    MessageBox.Show($"Zen garden saved successfully to:\n{saveDialog.FileName}", 
+
+                    MessageBox.Show($"Zen garden saved successfully to:\n{saveDialog.FileName}",
                         "Save Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (UnauthorizedAccessException)
             {
-                MessageBox.Show("Access denied. Please choose a different location or run as administrator.", 
+                MessageBox.Show("Access denied. Please choose a different location or run as administrator.",
                     "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (DirectoryNotFoundException)
             {
-                MessageBox.Show("The specified directory was not found. Please choose a valid location.", 
+                MessageBox.Show("The specified directory was not found. Please choose a valid location.",
                     "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (IOException ex)
             {
-                MessageBox.Show($"File I/O error: {ex.Message}", "Save Error", 
+                MessageBox.Show($"File I/O error: {ex.Message}", "Save Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
@@ -674,7 +674,7 @@ namespace ZenGardenGenerator
             content.AppendLine();
             content.AppendLine("ELEMENTS LEGEND:");
             content.AppendLine("=" + new string('=', 20));
-            
+
             if (elementDictionary != null)
             {
                 foreach (var element in elementDictionary.Values.OrderBy(e => e.Symbol))
@@ -682,7 +682,7 @@ namespace ZenGardenGenerator
                     content.AppendLine($"{element.Symbol} = {element.Name} ({element.Meaning})");
                 }
             }
-            
+
             content.AppendLine();
             content.AppendLine("ZEN PRINCIPLES:");
             content.AppendLine("=" + new string('=', 20));
@@ -693,6 +693,21 @@ namespace ZenGardenGenerator
             content.AppendLine("Stillness: Deep meditation and inner peace");
             content.AppendLine("Impermanence: Eternal flow of time and change");
             content.AppendLine("Harmony: Unified tranquility of all elements");
+            content.AppendLine();
+            content.AppendLine("AUTHENTIC JAPANESE GARDEN COLOR SCHEME:");
+            content.AppendLine("=" + new string('=', 45));
+            content.AppendLine("Colors inspired by traditional Japanese garden imagery:");
+            content.AppendLine("# Large Rocks - Deep weathered stone gray (85, 85, 85)");
+            content.AppendLine("@ Medium Rocks - Natural stone gray (105, 105, 105)");
+            content.AppendLine("o Small Stones - Light stone gray (128, 128, 128)");
+            content.AppendLine(". Fine Gravel - Warm gravel beige (230, 220, 200)");
+            content.AppendLine("- Horizontal Raked - Subtle blue-gray patterns (180, 190, 200)");
+            content.AppendLine("| Vertical Raked - Flow pattern blue-gray (160, 175, 190)");
+            content.AppendLine("~ Curved Raked - Flowing wave blue-gray (140, 160, 180)");
+            content.AppendLine("^ Moss - Rich natural moss green (85, 120, 60)");
+            content.AppendLine("* Stone Lantern - Warm golden lantern glow (255, 200, 100)");
+            content.AppendLine("= Bridge/Path - Natural wood bridge brown (160, 120, 80)");
+            content.AppendLine("+ Water Feature - Beautiful Japanese pond blue (70, 130, 180)");
             content.AppendLine();
             content.AppendLine("ADVANCED GENERATION RULES & AUTHENTIC JAPANESE PRINCIPLES:");
             content.AppendLine("=" + new string('=', 65));
@@ -707,11 +722,12 @@ namespace ZenGardenGenerator
             content.AppendLine("Stone lanterns positioned for maximum spiritual impact");
             content.AppendLine("Flow patterns enhanced around obstacles");
             content.AppendLine("Visual density optimization for proper ASCII art contrast");
+            content.AppendLine("Colors based on authentic Japanese garden photography");
             content.AppendLine();
-            content.AppendLine("Generated on: 2025-06-22 20:47:34 UTC for user: cs121287");
+            content.AppendLine("Generated on: 2025-06-22 21:25:56 UTC for user: cs121287");
             content.AppendLine("Created with Advanced Traditional Japanese Zen Garden Generator");
             content.AppendLine("Each garden follows authentic Karesansui principles with modern algorithms");
-            
+
             return content.ToString();
         }
 
@@ -758,7 +774,7 @@ namespace ZenGardenGenerator
             {
                 if (statusLabel != null && !statusLabel.IsDisposed && statusLabel.IsHandleCreated)
                 {
-                    statusLabel.Text = "Generated on: 2025-06-22 20:47:34 UTC for user: cs121287";
+                    statusLabel.Text = "Generated on: 2025-06-22 21:25:56 UTC for user: cs121287";
                 }
             });
         }
@@ -768,7 +784,7 @@ namespace ZenGardenGenerator
             try
             {
                 if (!isFormReady) return;
-                
+
                 if (InvokeRequired)
                 {
                     try
@@ -815,12 +831,12 @@ namespace ZenGardenGenerator
             try
             {
                 isFormReady = false;
-                
+
                 cancellationTokenSource?.Cancel();
                 Thread.Sleep(100);
-                
+
                 cancellationTokenSource?.Dispose();
-                
+
                 // Dispose UI components
                 gardenDisplay?.Dispose();
                 gardenPanel?.Dispose();
@@ -831,7 +847,7 @@ namespace ZenGardenGenerator
                 statusLabel?.Dispose();
                 progressBar?.Dispose();
                 mainContainer?.Dispose();
-                
+
                 // Dispose zen elements
                 if (elementDictionary != null)
                 {
@@ -841,13 +857,22 @@ namespace ZenGardenGenerator
                     }
                     elementDictionary.Clear();
                 }
-                
+
                 disposed = true;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Cleanup error: {ex.Message}");
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!disposed && disposing)
+            {
+                CleanupResources();
+            }
+            base.Dispose(disposing);
         }
 
         #endregion

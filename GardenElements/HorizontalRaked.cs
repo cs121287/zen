@@ -8,7 +8,8 @@ namespace ZenGardenGenerator.GardenElements
         public override char Symbol => '-';
         public override string Name => "Horizontal Raked";
         public override string Meaning => "Water currents, waves, flow";
-        public override Color Color => Color.FromArgb(176, 196, 222);
+        // Subtle blue-gray for raked gravel patterns from garden imagery
+        public override Color Color => Color.FromArgb(180, 190, 200);
         public override GenerationRules.GenerationPhase Phase => GenerationRules.GenerationPhase.FlowPatterns;
         public override ElementCategory Category => ElementCategory.Pattern;
 
@@ -33,18 +34,12 @@ namespace ZenGardenGenerator.GardenElements
             double probability = 0.08;
 
             // Prefer flow and center zones
-            switch (zone.Type)
+            probability *= zone.Type switch
             {
-                case ZoneType.Flow:
-                    probability *= 4.0;
-                    break;
-                case ZoneType.Center:
-                    probability *= 2.5;
-                    break;
-                default:
-                    probability *= 0.5;
-                    break;
-            }
+                ZoneType.Flow => 4.0,
+                ZoneType.Center => 2.5,
+                _ => 0.5
+            };
 
             // Create wave patterns
             probability *= 1.0 + Math.Sin(row * 0.3) * 0.4;
@@ -56,7 +51,7 @@ namespace ZenGardenGenerator.GardenElements
         {
             // Create horizontal lines of 3-8 characters
             int lineLength = context.Random.Next(3, 9);
-            
+
             for (int i = 0; i < lineLength && col + i < garden.GetLength(1); i++)
             {
                 if (garden[row, col + i] == '.')

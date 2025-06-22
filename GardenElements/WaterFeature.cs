@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Linq;
 
 namespace ZenGardenGenerator.GardenElements
 {
@@ -8,7 +9,8 @@ namespace ZenGardenGenerator.GardenElements
         public override char Symbol => '+';
         public override string Name => "Water Feature";
         public override string Meaning => "Purity, flow of life, intersection";
-        public override Color Color => Color.FromArgb(0, 191, 255);
+        // Beautiful blue water color from Japanese garden pond imagery
+        public override Color Color => Color.FromArgb(70, 130, 180);
         public override GenerationRules.GenerationPhase Phase => GenerationRules.GenerationPhase.Water;
         public override ElementCategory Category => ElementCategory.Water;
 
@@ -37,18 +39,12 @@ namespace ZenGardenGenerator.GardenElements
             double probability = 0.01;
 
             // Prefer center and focal point zones
-            switch (zone.Type)
+            probability *= zone.Type switch
             {
-                case ZoneType.Center:
-                    probability *= 5.0;
-                    break;
-                case ZoneType.FocalPoint:
-                    probability *= 4.0;
-                    break;
-                default:
-                    probability *= 0.2;
-                    break;
-            }
+                ZoneType.Center => 5.0,
+                ZoneType.FocalPoint => 4.0,
+                _ => 0.2
+            };
 
             return probability * zone.GetDistanceInfluence(row, col);
         }
@@ -56,10 +52,10 @@ namespace ZenGardenGenerator.GardenElements
         public override void PlaceElement(int row, int col, char[,] garden, GardenContext context)
         {
             base.PlaceElement(row, col, garden, context);
-            
+
             // Create a small pond or river system
             var waterPath = new WaterPath();
-            
+
             // Decide if this is a pond or river start
             if (context.Random.NextDouble() < 0.6) // 60% chance for pond
             {
@@ -69,18 +65,18 @@ namespace ZenGardenGenerator.GardenElements
             {
                 CreateRiver(row, col, garden, context, waterPath);
             }
-            
+
             context.RecordWaterPath(waterPath);
         }
 
-        private void CreatePond(int row, int col, char[,] garden, GardenContext context, WaterPath waterPath)
+        private static void CreatePond(int row, int col, char[,] garden, GardenContext context, WaterPath waterPath)
         {
             waterPath.IsPond = true;
             waterPath.AddPoint(row, col);
-            
+
             // Small pond 2-3 units in diameter
             var pondSize = context.Random.Next(1, 3);
-            
+
             for (int r = row - pondSize; r <= row + pondSize; r++)
             {
                 for (int c = col - pondSize; c <= col + pondSize; c++)
@@ -98,35 +94,35 @@ namespace ZenGardenGenerator.GardenElements
             }
         }
 
-        private void CreateRiver(int row, int col, char[,] garden, GardenContext context, WaterPath waterPath)
+        private static void CreateRiver(int row, int col, char[,] garden, GardenContext context, WaterPath waterPath)
         {
             waterPath.AddPoint(row, col);
-            
+
             // Create winding river
             int currentRow = row;
             int currentCol = col;
             int length = context.Random.Next(8, 20);
-            
+
             // Random initial direction
             double direction = context.Random.NextDouble() * Math.PI * 2;
-            
+
             for (int i = 0; i < length; i++)
             {
                 // Gradually change direction for natural winding
                 direction += (context.Random.NextDouble() - 0.5) * 0.8;
-                
+
                 int nextRow = currentRow + (int)Math.Round(Math.Sin(direction));
                 int nextCol = currentCol + (int)Math.Round(Math.Cos(direction));
-                
+
                 // Bounds check
-                if (nextRow < 1 || nextRow >= garden.GetLength(0) - 1 || 
+                if (nextRow < 1 || nextRow >= garden.GetLength(0) - 1 ||
                     nextCol < 1 || nextCol >= garden.GetLength(1) - 1)
                     break;
-                
+
                 // Check for intersection with existing water
                 if (context.WaterPaths.Any(path => path.ContainsPoint(nextRow, nextCol)))
                     break;
-                
+
                 // Place water if area is clear
                 if (garden[nextRow, nextCol] == '.')
                 {

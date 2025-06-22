@@ -10,24 +10,17 @@ namespace ZenGardenGenerator
     /// <summary>
     /// Advanced procedural generation engine with authentic Japanese garden rules
     /// </summary>
-    public class GardenGenerator
+    public class GardenGenerator(Random random)
     {
-        private readonly Random random;
-        private readonly List<ZenElement> elements;
-        private readonly List<GardenZone> zones;
+        private readonly Random random = random;
+        private readonly List<ZenElement> elements = InitializeElements();
+        private readonly List<GardenZone> zones = [];
         private const int MAX_PLACEMENT_ATTEMPTS = 1000;
-        
-        public GardenGenerator(Random random)
+
+        private static List<ZenElement> InitializeElements()
         {
-            this.random = random;
-            this.elements = InitializeElements();
-            this.zones = new List<GardenZone>();
-        }
-        
-        private List<ZenElement> InitializeElements()
-        {
-            return new List<ZenElement>
-            {
+            return
+            [
                 // Terrain phase
                 new LargeRocks(),
                 new MediumRocks(),
@@ -50,7 +43,7 @@ namespace ZenGardenGenerator
                 // Decoration phase
                 new Moss(),
                 new StoneLantern()
-            };
+            ];
         }
         
         /// <summary>
@@ -66,7 +59,7 @@ namespace ZenGardenGenerator
             CreateGardenZones(width, height);
             progress?.Report(5);
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             // Step 2: Initialize garden array (10% progress)
             InitializeGarden(garden);
             progress?.Report(10);
@@ -112,7 +105,7 @@ namespace ZenGardenGenerator
             zones.Add(new GardenZone(ZoneType.Corner, height*9/10, width*9/10, width/10, height/10, 1.0));
         }
         
-        private void InitializeGarden(char[,] garden)
+        private static void InitializeGarden(char[,] garden)
         {
             // Initialize all cells as empty (will be filled with fine gravel later)
             for (int row = 0; row < garden.GetLength(0); row++)
@@ -199,7 +192,7 @@ namespace ZenGardenGenerator
             }
         }
         
-        private async Task GenerateGravelPhase(char[,] garden, GardenContext context, List<ZenElement> elements, CancellationToken cancellationToken)
+        private static async Task GenerateGravelPhase(char[,] garden, GardenContext context, List<ZenElement> elements, CancellationToken cancellationToken)
         {
             // Fill all empty spaces with fine gravel
             var fineGravel = elements.FirstOrDefault();
@@ -347,7 +340,7 @@ namespace ZenGardenGenerator
             // Find the zone with the strongest influence at this position
             var containingZones = zones.Where(z => z.Contains(row, col)).ToList();
             
-            if (containingZones.Any())
+            if (containingZones.Count != 0)
             {
                 // Return the zone with highest influence
                 return containingZones.OrderByDescending(z => z.Influence).First();
@@ -495,28 +488,23 @@ namespace ZenGardenGenerator
             }
         }
         
-        private bool CheckElementSupport(char[,] garden, int row, int col, char element, GardenContext context)
+        private static bool CheckElementSupport(char[,] garden, int row, int col, char element, GardenContext context)
         {
-            switch (element)
+            return element switch
             {
-                case '^': // Moss needs rocks or edges nearby
-                    return HasNearbyRocks(garden, row, col, 3) || IsNearEdge(garden, row, col, 5);
-                    
-                case '*': // Lanterns need clear space
-                    return HasClearSpace(garden, row, col, 4);
-                    
-                case '=': // Paths should connect or cross water
-                    return IsPartOfPath(garden, row, col) || CrossesWater(garden, row, col);
-                    
-                case '+': // Water features should have proper containment
-                    return true; // Water features are always valid once placed
-                    
-                default:
-                    return true;
-            }
+                // Moss needs rocks or edges nearby
+                '^' => HasNearbyRocks(garden, row, col, 3) || IsNearEdge(garden, row, col, 5),
+                // Lanterns need clear space
+                '*' => HasClearSpace(garden, row, col, 4),
+                // Paths should connect or cross water
+                '=' => IsPartOfPath(garden, row, col) || CrossesWater(garden, row, col),
+                // Water features should have proper containment
+                '+' => true,// Water features are always valid once placed
+                _ => true,
+            };
         }
         
-        private bool HasNearbyRocks(char[,] garden, int row, int col, int radius)
+        private static bool HasNearbyRocks(char[,] garden, int row, int col, int radius)
         {
             for (int r = Math.Max(0, row - radius); r <= Math.Min(garden.GetLength(0) - 1, row + radius); r++)
             {
@@ -530,13 +518,13 @@ namespace ZenGardenGenerator
             return false;
         }
         
-        private bool IsNearEdge(char[,] garden, int row, int col, int distance)
+        private static bool IsNearEdge(char[,] garden, int row, int col, int distance)
         {
             return row < distance || row >= garden.GetLength(0) - distance ||
                    col < distance || col >= garden.GetLength(1) - distance;
         }
         
-        private bool HasClearSpace(char[,] garden, int row, int col, int radius)
+        private static bool HasClearSpace(char[,] garden, int row, int col, int radius)
         {
             int clearCount = 0;
             int totalCount = 0;
@@ -557,14 +545,14 @@ namespace ZenGardenGenerator
             return totalCount > 0 && (clearCount / (double)totalCount) > 0.7;
         }
         
-        private bool IsPartOfPath(char[,] garden, int row, int col)
+        private static bool IsPartOfPath(char[,] garden, int row, int col)
         {
             // Check if this path element connects to other path elements
             int pathConnections = 0;
             
             // Check 4 directions
-            int[] dr = {-1, 1, 0, 0};
-            int[] dc = {0, 0, -1, 1};
+            int[] dr = [-1, 1, 0, 0];
+            int[] dc = [0, 0, -1, 1];
             
             for (int i = 0; i < 4; i++)
             {
@@ -581,11 +569,11 @@ namespace ZenGardenGenerator
             return pathConnections > 0;
         }
         
-        private bool CrossesWater(char[,] garden, int row, int col)
+        private static bool CrossesWater(char[,] garden, int row, int col)
         {
             // Check if this path element crosses water
-            int[] dr = {-1, 1, 0, 0};
-            int[] dc = {0, 0, -1, 1};
+            int[] dr = [-1, 1, 0, 0];
+            int[] dc = [0, 0, -1, 1];
             
             for (int i = 0; i < 4; i++)
             {
@@ -631,7 +619,7 @@ namespace ZenGardenGenerator
             }
         }
         
-        private int GetSurroundingDensity(char[,] garden, int row, int col)
+        private static int GetSurroundingDensity(char[,] garden, int row, int col)
         {
             int totalDensity = 0;
             

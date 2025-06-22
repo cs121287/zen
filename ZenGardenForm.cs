@@ -46,7 +46,7 @@ namespace ZenGardenGenerator
 
         // Current garden data
         private char[,]? currentGarden;
-        private Dictionary<char, ZenElement>? elementDictionary;
+        private readonly Dictionary<char, ZenElement>? elementDictionary;
 
         // Static readonly arrays for legend display
         private static readonly char[] RockStoneSymbols = ['#', '@', 'o'];
@@ -345,7 +345,7 @@ namespace ZenGardenGenerator
             statusLabel?.Dispose();
             statusLabel = new Label
             {
-                Text = "Generated on: 2025-06-22 21:25:56 UTC for user: cs121287",
+                Text = "Generated on: 2025-06-22 21:39:40 UTC for user: cs121287",
                 Font = new Font("Segoe UI", 9F, FontStyle.Italic),
                 ForeColor = Color.FromArgb(105, 105, 105),
                 Location = new Point(380, 20),
@@ -437,7 +437,7 @@ namespace ZenGardenGenerator
             }, cancellationToken);
         }
 
-        private string ConvertGardenToString(char[,] garden)
+        private static string ConvertGardenToString(char[,] garden)
         {
             var gardenText = new StringBuilder();
             int height = garden.GetLength(0);
@@ -724,7 +724,7 @@ namespace ZenGardenGenerator
             content.AppendLine("Visual density optimization for proper ASCII art contrast");
             content.AppendLine("Colors based on authentic Japanese garden photography");
             content.AppendLine();
-            content.AppendLine("Generated on: 2025-06-22 21:25:56 UTC for user: cs121287");
+            content.AppendLine("Generated on: 2025-06-22 21:39:40 UTC for user: cs121287");
             content.AppendLine("Created with Advanced Traditional Japanese Zen Garden Generator");
             content.AppendLine("Each garden follows authentic Karesansui principles with modern algorithms");
 
@@ -774,7 +774,7 @@ namespace ZenGardenGenerator
             {
                 if (statusLabel != null && !statusLabel.IsDisposed && statusLabel.IsHandleCreated)
                 {
-                    statusLabel.Text = "Generated on: 2025-06-22 21:25:56 UTC for user: cs121287";
+                    statusLabel.Text = "Generated on: 2025-06-22 21:39:40 UTC for user: cs121287";
                 }
             });
         }

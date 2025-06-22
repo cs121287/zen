@@ -51,39 +51,39 @@ namespace ZenGardenGenerator
         public static readonly Dictionary<Type, ZoneRestrictions> ZoneRules = new()
         {
             [typeof(GardenElements.LargeRocks)] = new(
-                forbidden: [ZoneType.GravelGarden], 
-                preferred: [ZoneType.FocalPoint, ZoneType.Corner],
-                edgeBuffer: 5
+                [ZoneType.GravelGarden],
+                [ZoneType.FocalPoint, ZoneType.Corner],
+                5
             ),
             [typeof(GardenElements.MediumRocks)] = new(
-                forbidden: [ZoneType.GravelGarden], 
-                preferred: [ZoneType.FocalPoint, ZoneType.Edge],
-                edgeBuffer: 3
+                [ZoneType.GravelGarden],
+                [ZoneType.FocalPoint, ZoneType.Edge],
+                3
             ),
             [typeof(GardenElements.SmallStones)] = new(
-                forbidden: [ZoneType.GravelGarden], 
-                preferred: [ZoneType.Edge, ZoneType.Corner],
-                edgeBuffer: 2
+                [ZoneType.GravelGarden],
+                [ZoneType.Edge, ZoneType.Corner],
+                2
             ),
             [typeof(GardenElements.WaterFeature)] = new(
-                forbidden: [ZoneType.GravelGarden, ZoneType.Corner], 
-                preferred: [ZoneType.Center, ZoneType.FocalPoint],
-                edgeBuffer: 8
+                [ZoneType.GravelGarden, ZoneType.Corner],
+                [ZoneType.Center, ZoneType.FocalPoint],
+                8
             ),
             [typeof(GardenElements.BridgePath)] = new(
-                forbidden: [ZoneType.GravelGarden], 
-                preferred: [ZoneType.Flow, ZoneType.Center],
-                edgeBuffer: 3
+                [ZoneType.GravelGarden],
+                [ZoneType.Flow, ZoneType.Center],
+                3
             ),
             [typeof(GardenElements.StoneLantern)] = new(
-                forbidden: [ZoneType.GravelGarden, ZoneType.Flow], 
-                preferred: [ZoneType.FocalPoint],
-                edgeBuffer: 10
+                [ZoneType.GravelGarden, ZoneType.Flow],
+                [ZoneType.FocalPoint],
+                10
             ),
             [typeof(GardenElements.Moss)] = new(
-                forbidden: [ZoneType.GravelGarden], 
-                preferred: [ZoneType.Edge, ZoneType.Corner],
-                edgeBuffer: 1
+                [ZoneType.GravelGarden],
+                [ZoneType.Edge, ZoneType.Corner],
+                1
             )
         };
     }

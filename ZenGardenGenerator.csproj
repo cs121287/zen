@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <ApplicationIcon>zen.ico</ApplicationIcon>
+    <AssemblyTitle>Traditional Japanese Zen Garden Generator</AssemblyTitle>
+    <AssemblyDescription>Create beautiful Karesansui gardens with authentic elements and Zen principles</AssemblyDescription>
+    <AssemblyCompany>Zen Garden Studio</AssemblyCompany>
+    <AssemblyProduct>Zen Garden Generator</AssemblyProduct>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Copyright>© 2025 Zen Garden Studio. All rights reserved.</Copyright>
+    <TrimMode>link</TrimMode>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>true</Optimize>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+
+</Project>
